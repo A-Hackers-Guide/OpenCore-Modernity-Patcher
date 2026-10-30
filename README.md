@@ -331,8 +331,8 @@ Build-Folder/
         ├── config.plist      ← validated with ocvalidate
         ├── ACPI/             ← only the SSDTs your platform needs
         ├── Drivers/          ← OpenRuntime, OpenHfsPlus, ResetNvramEntry (+ OpenCanopy)
+        ├── Resources/        ← OpenCanopy theme from OcBinaryData when the GUI picker is on
         ├── Kexts/            ← Lilu first, then plug-ins, in load order
-        ├── Resources/
         └── Tools/
 ```
 

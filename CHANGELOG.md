@@ -4,6 +4,11 @@ All notable changes to OpenCore Modernity Patcher. Versions follow [Semantic Ver
 
 ## [Unreleased]
 
+## [0.1.0-beta.4] - 2026-10-30
+
+### Added
+- **One-click graphical boot picker.** Turning on *Settings → GUI Boot Picker (OpenCanopy)* now downloads Acidanthera's official OcBinaryData theme (icons, fonts, labels, audio) into `EFI/OC/Resources`, adds `OpenCanopy.efi`, and sets `PickerMode=External`. Before, you had to copy the theme by hand. The 65 MB download is cached and refreshed weekly. Verified: the resulting Tahoe EFI passes `ocvalidate`.
+
 ## [0.1.0-beta.3] - 2026-10-30
 
 Second "First Light" pre-release: macOS Golden Gate diagnosis and three new tools.

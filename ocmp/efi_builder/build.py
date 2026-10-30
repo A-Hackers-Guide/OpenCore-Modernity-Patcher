@@ -8,6 +8,7 @@ write config.plist, copy files, then validate with ocvalidate.
 import re
 import json
 import sys
+import time
 import uuid
 import shutil
 import secrets
@@ -25,6 +26,7 @@ from .config import ConfigBuilder, amd_patches
 
 
 AMD_VANILLA_URL = "https://raw.githubusercontent.com/AMD-OSX/AMD_Vanilla/master/patches.plist"
+OCBINARYDATA_URL = "https://codeload.github.com/acidanthera/OcBinaryData/zip/refs/heads/master"
 
 
 class BuildError(Exception):
@@ -119,10 +121,27 @@ class BuildOpenCore:
             target = efi / "OC" / sub
             shutil.rmtree(target, ignore_errors=True)
             target.mkdir(parents=True)
-        if not self.c.opencanopy:
-            shutil.rmtree(efi / "OC" / "Resources", ignore_errors=True)
+        shutil.rmtree(efi / "OC" / "Resources", ignore_errors=True)
+        if self.c.opencanopy:
+            shutil.copytree(self._canopy_resources(), efi / "OC" / "Resources")
+            logging.info("- Added OpenCanopy theme from acidanthera/OcBinaryData")
+        else:
             (efi / "OC" / "Resources").mkdir()
         return efi
+
+    def _canopy_resources(self) -> Path:
+        """
+        OcBinaryData has no releases; take the master branch, refreshed weekly
+        """
+        archive = self.c.cache_path / "payloads" / "OcBinaryData-master.zip"
+        if archive.exists() and time.time() - archive.stat().st_mtime > 7 * 86400:
+            archive.unlink()
+            shutil.rmtree(archive.with_suffix(""), ignore_errors=True)
+        self.net.download(OCBINARYDATA_URL, archive, "OcBinaryData (OpenCanopy theme)")
+        resources = self.net.extract(archive) / "OcBinaryData-master" / "Resources"
+        if not (resources / "Image").is_dir():
+            raise BuildError("OcBinaryData download has no Resources/Image folder")
+        return resources
 
     def _prune_drivers(self, efi: Path) -> None:
         drivers = efi / "OC" / "Drivers"

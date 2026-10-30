@@ -134,7 +134,7 @@ class SettingsFrame(wx.Frame):
                 "Picker Timeout": {"type": "spinctrl", "variable": "oc_timeout", "min": 0, "max": 60,
                                    "description": ["Seconds before the default entry boots (0 = wait)."]},
                 "GUI Boot Picker (OpenCanopy)": {"type": "checkbox", "variable": "opencanopy",
-                                                 "description": ["Graphical picker instead of the text menu.", "Needs OcBinaryData resources added by hand."]},
+                                                 "description": ["Graphical picker instead of the text menu.", "Downloads Acidanthera's OcBinaryData theme (65 MB, cached)."]},
             },
             "Hardware": {
                 "Hardware": {"type": "title"},
