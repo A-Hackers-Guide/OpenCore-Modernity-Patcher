@@ -136,12 +136,12 @@ The windows, sizes and flow match OpenCore Legacy Patcher's, so OCLP users will 
 
 | OCLP window | Here | Differences |
 |---|---|---|
-| Main menu (600 px, two columns) | Same layout | "Post-Install Root Patch" becomes **Detect Hardware**: root patching edits a macOS system volume and can only run inside macOS. |
+| Main menu (600 px, two columns) | Same layout | "Post-Install Root Patch" becomes **Detect Hardware** (root patching edits a macOS system volume and can only run inside macOS). It lists the detected parts, the newest macOS this PC can run, and loads/saves hardware profiles. |
 | Build and Install OpenCore | Same: log view, then *Install to disk* | Extra button: **Open EFI folder**. |
 | Install OpenCore → disk → volume | Same three steps | Lists disks with an EFI partition; blue = removable. Boot disks get an extra warning, and the old `EFI/OC` is backed up to `EFI-backup-ocmp`. |
 | Create macOS Installer | Same: *Download* / *Use existing*, version list, disk list, flashing | Downloads **Recovery** (`BaseSystem.dmg`) from Apple instead of a full `InstallAssistant.pkg`, which can't be unpacked outside macOS. Installing then needs internet. |
-| Settings (600×685, tabs) | Same structure | Tabs: Build, Hardware, Security, SMBIOS, Advanced. *Target Model* (a Mac) becomes **Target macOS** plus an SMBIOS override. |
-| Support / About / Credits | Same | Links to Dortania guides, USBToolBox, AMD_Vanilla. |
+| Settings (600×685, tabs) | Same structure | Tabs: Build, Hardware, Security, SMBIOS, Advanced. *Target Model* (a Mac) becomes **Target macOS** (Golden Gate is listed but explained, not built) plus an SMBIOS override and **Generate new serial**. |
+| Support / About / Credits | Same, plus tools | Links to Dortania guides, USBToolBox and AMD_Vanilla, plus **Compatibility Report**, **Check a macOS Install** and **Check an Existing EFI** (with *Update kexts*). |
 | File → Reveal Log File | Same | Opens Explorer or your Linux file manager. |
 
 Icons are drawn by the app itself. OCLP's artwork carries its branding, so it isn't used.
@@ -464,6 +464,9 @@ ocmp/
 ├── network_handler.py        GitHub releases, downloads, cache
 ├── disk_handler.py           list disks, mount EFI partitions, flash USB
 ├── macos_installer_handler.py  Apple recovery via macrecovery.py
+├── macos_inspector.py        can a macOS install run on PCs? (Mach-O parsing; Golden Gate diagnosis)
+├── compatibility.py          newest macOS per PC, across every version
+├── efi_checker.py            check / update an existing EFI (kexts, missing files, ocvalidate)
 ├── settings.py               persist settings
 ├── datasets/                 CPU, PCI, SMBIOS, iGPU and kext tables
 ├── efi_builder/
@@ -472,7 +475,7 @@ ocmp/
 │   └── build.py              download, assemble, macserial, ocvalidate
 └── wx_gui/                   windows (main menu, build, install, installer, settings, help, about)
 packaging/                    PyInstaller spec, AppImage script, icons, release naming
-tests/                        planner, parser and patch tests
+tests/                        planner, Windows parser, AMD patch, Golden Gate, inspector, compatibility, serial and EFI updater tests
 examples/profiles/            sample hardware profiles
 ```
 

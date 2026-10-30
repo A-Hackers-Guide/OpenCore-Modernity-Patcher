@@ -92,3 +92,16 @@ CI (`.github/workflows/build.yml`) then:
 5. publishes the GitHub release, setting **Pre-release** and **Latest** from the channel.
 
 To withdraw a bad release, mark it as a pre-release (or delete it) and publish a fixed patch version. Tags that were published are never moved or reused.
+
+## Release history
+
+| Tag | Published | Channel | Highlights |
+|---|---|---|---|
+| `v0.1.0-beta.5` | 2026-10-30 | Pre-release | Update kexts in an existing EFI, with backup |
+| `v0.1.0-beta.4` | 2026-10-30 | Pre-release | One-click OpenCanopy (GUI boot picker) theme |
+| `v0.1.0-beta.3` | 2026-10-30 | Pre-release | Golden Gate diagnosis, macOS inspector, compatibility report, EFI checker, saved serials |
+| `v0.1.0-beta.2` | 2026-10-30 | Pre-release | First public release (Windows UTF-8 fix) |
+| `v0.1.0-beta.1` | *never published* | n/a | Tagged, but the Windows build failed, so CI published nothing. Kept because tags are never reused. |
+
+No stable release yet: 0.1.0 needs the real-hardware reports listed above.
+
