@@ -425,6 +425,16 @@ Inside: `Build-Folder/` (last EFI), `cache/` (downloads, safe to delete), `Recov
 
 Dortania's [troubleshooting guide](https://dortania.github.io/OpenCore-Install-Guide/troubleshooting/troubleshooting.html) covers boot errors in depth.
 
+### Reporting a problem
+
+Open an [issue](https://github.com/A-Hackers-Guide/OpenCore-Modernity-Patcher/issues/new/choose) and pick a form: **Boot or install problem**, **App or build error**, or **Hardware support request**. The forms ask for what's needed to fix it:
+
+- `BuildReport.txt` (next to the built `EFI` folder)
+- the log (*File → Reveal Log File*)
+- your hardware profile (*Detect Hardware → Save profile...*, or `--save-profile profile.json`)
+
+A hardware profile lets the exact same build be reproduced on any machine, so problems can be fixed without access to yours.
+
 ---
 
 ## 🔨 Building from source

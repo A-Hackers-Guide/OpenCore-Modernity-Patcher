@@ -1,0 +1,77 @@
+name: "🧩 Hardware support request"
+description: Ask for a CPU, GPU, network card, laptop or VM setup to be supported (or report one that's detected wrongly).
+title: "[Hardware] "
+labels: ["enhancement", "hardware"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Some hardware can never work in macOS because Apple ships no drivers for it, and no app can change that:
+        **NVIDIA GTX 16 / RTX 20, 30, 40, 50**, **AMD RX 6400/6500 (Navi 24)**, **RX 7000 / RX 9000**, and **Intel Ivy Bridge or older**.
+        **macOS Golden Gate (27)** can't run on any PC.
+
+        Anything else is fair game. If it already works with a hand-made OpenCore config, say so and paste the relevant parts.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of hardware?
+      options:
+        - CPU
+        - GPU
+        - Ethernet
+        - Wi-Fi / Bluetooth
+        - Audio
+        - Laptop (trackpad, keyboard, battery, backlight)
+        - Virtual machine (hypervisor or setup)
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Device name and PCI ID
+      description: The PCI ID looks like `8086:15F3`. It's in Detect Hardware, Device Manager (Details → Hardware Ids), or `lspci -nn` on Linux.
+      placeholder: Intel Ethernet Controller I226-V, 8086:125C
+    validations:
+      required: true
+
+  - type: dropdown
+    id: target
+    attributes:
+      label: macOS you want to run
+      options:
+        - macOS Tahoe (26)
+        - macOS Sequoia (15)
+        - macOS Sonoma (14)
+        - macOS Ventura (13)
+        - macOS Monterey (12)
+        - Older
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens now?
+      description: For example "build fails with No usable GPU", "detected as Unknown", or "builds, but Ethernet doesn't work".
+    validations:
+      required: true
+
+  - type: textarea
+    id: known
+    attributes:
+      label: Known working setup (if any)
+      description: Kexts, boot-args, DeviceProperties or guides that make it work by hand.
+    validations:
+      required: false
+
+  - type: textarea
+    id: profile
+    attributes:
+      label: Hardware profile (JSON)
+      description: Main menu → Detect Hardware → Save profile..., or `--save-profile profile.json`.
+      render: json
+    validations:
+      required: true

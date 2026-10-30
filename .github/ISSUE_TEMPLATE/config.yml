@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "🌉 Can I run macOS Golden Gate (27)?"
+    url: https://github.com/A-Hackers-Guide/OpenCore-Modernity-Patcher#-macos-golden-gate-27-why-pcs-cant-run-it
+    about: No. Golden Gate is Apple-silicon only. Tahoe (26) is the newest macOS a PC can run. The README explains how this was checked.
+  - name: "📖 Dortania troubleshooting guide"
+    url: https://dortania.github.io/OpenCore-Install-Guide/troubleshooting/troubleshooting.html
+    about: Boot errors, kernel panics and what verbose-mode messages mean.
+  - name: "🔌 USB port mapping (USBToolBox)"
+    url: https://github.com/USBToolBox/tool
+    about: USB ports missing or not working after install? Map them with USBToolBox first.

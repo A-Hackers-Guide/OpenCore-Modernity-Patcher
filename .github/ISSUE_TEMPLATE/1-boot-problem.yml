@@ -1,0 +1,139 @@
+name: "🥾 Boot or install problem"
+description: The EFI was built, but the PC or VM won't boot, install macOS, or work properly after install.
+title: "[Boot] "
+labels: ["bug", "boot"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing! Boot problems can only be fixed with the files below, so please attach them all.
+
+        - **BuildReport.txt** is next to the `EFI` folder the app built (in the app: *Build* → *Open EFI folder*).
+        - **The log**: *File → Reveal Log File* (`ocmp.log`).
+        - **Hardware profile**: main menu → *Detect Hardware* → *Save profile...*
+
+        macOS **Golden Gate (27)** can't run on PCs at all; see the [README](https://github.com/A-Hackers-Guide/OpenCore-Modernity-Patcher#-macos-golden-gate-27-why-pcs-cant-run-it).
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you file
+      options:
+        - label: I'm using the latest pre-release from the Releases page.
+          required: true
+        - label: I searched existing issues for the same problem.
+          required: true
+        - label: I read *Known limitations* and *Troubleshooting* in the README.
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Shown under the title on the main menu.
+      placeholder: 0.1.0-beta.5
+    validations:
+      required: true
+
+  - type: dropdown
+    id: host
+    attributes:
+      label: Built the EFI on
+      options:
+        - Windows 11
+        - Windows 10
+        - Linux (AppImage)
+        - From source / command line
+    validations:
+      required: true
+
+  - type: dropdown
+    id: target
+    attributes:
+      label: Target macOS
+      options:
+        - macOS Tahoe (26)
+        - macOS Sequoia (15)
+        - macOS Sonoma (14)
+        - macOS Ventura (13)
+        - macOS Monterey (12)
+        - macOS Big Sur (11)
+        - macOS Catalina (10.15)
+        - macOS Mojave (10.14)
+        - macOS High Sierra (10.13)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: machine
+    attributes:
+      label: Machine type
+      options:
+        - Intel desktop
+        - Intel laptop
+        - Intel HEDT (X99 / X299)
+        - AMD desktop
+        - AMD laptop
+        - KVM / QEMU / Proxmox virtual machine
+    validations:
+      required: true
+
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Where does it stop?
+      options:
+        - Firmware doesn't see the USB / OpenCore picker never appears
+        - OpenCore picker appears, but choosing macOS does nothing or errors
+        - Verbose text stops or loops (please photograph the last screen)
+        - Black screen after the Apple logo / progress bar
+        - Installer starts but fails or reboots
+        - macOS installed, but something doesn't work (Wi-Fi, audio, sleep, USB...)
+        - Other (describe below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what you saw. Attach photos of the last screen if it's stuck in verbose mode.
+    validations:
+      required: true
+
+  - type: textarea
+    id: bios
+    attributes:
+      label: BIOS / VM settings
+      description: Secure Boot, CSM, VT-d, Above 4G, XHCI hand-off, CFG Lock... For VMs, your QEMU command or libvirt XML (CPU model, machine type, firmware).
+      placeholder: |
+        Secure Boot: off, CSM: off, VT-d: on, Above 4G: on
+    validations:
+      required: false
+
+  - type: textarea
+    id: report
+    attributes:
+      label: BuildReport.txt
+      description: Paste the whole file.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: profile
+    attributes:
+      label: Hardware profile (JSON)
+      description: Main menu → Detect Hardware → Save profile... Paste it, or drag the file into this box.
+      render: json
+    validations:
+      required: true
+
+  - type: textarea
+    id: log
+    attributes:
+      label: App log (ocmp.log)
+      description: File → Reveal Log File. The last build is enough.
+      render: shell
+    validations:
+      required: false

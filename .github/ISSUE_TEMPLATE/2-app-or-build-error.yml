@@ -1,0 +1,92 @@
+name: "🛠️ App or build error"
+description: The app crashes, won't start, can't detect hardware, fails to build, or ocvalidate reports problems.
+title: "[App] "
+labels: ["bug", "build"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If the build stopped with **"No usable GPU"** or **"Golden Gate is Apple-silicon only"**, that's the app correctly refusing hardware macOS can't use; see *Supported hardware* in the README. Use the **Hardware support request** form if you think it's wrong.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you file
+      options:
+        - label: I'm using the latest pre-release from the Releases page.
+          required: true
+        - label: I searched existing issues for the same problem.
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      placeholder: 0.1.0-beta.5
+    validations:
+      required: true
+
+  - type: dropdown
+    id: host
+    attributes:
+      label: Running on
+      options:
+        - Windows 11
+        - Windows 10
+        - Linux (AppImage)
+        - From source / command line
+    validations:
+      required: true
+
+  - type: input
+    id: distro
+    attributes:
+      label: OS details
+      description: Windows build, or Linux distro and version. Say if you ran it as administrator / with sudo.
+      placeholder: Ubuntu 24.04, run with sudo -E
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part?
+      options:
+        - App won't start / crashes on launch
+        - Detect Hardware (wrong or missing parts)
+        - Build and Install OpenCore (build fails)
+        - ocvalidate reported problems
+        - Install OpenCore (disk list / copy to EFI partition)
+        - Create macOS Installer (download or USB flashing)
+        - Settings
+        - Compatibility report / macOS inspector / EFI checker or updater
+        - Command line options
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Steps to reproduce, what you expected, and the exact error message.
+    validations:
+      required: true
+
+  - type: textarea
+    id: log
+    attributes:
+      label: App log (ocmp.log)
+      description: File → Reveal Log File. Paste the part around the error.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: profile
+    attributes:
+      label: Hardware profile (JSON)
+      description: Main menu → Detect Hardware → Save profile..., or `--save-profile profile.json`. Lets us reproduce your build exactly.
+      render: json
+    validations:
+      required: false
