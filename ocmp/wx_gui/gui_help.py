@@ -117,10 +117,25 @@ class HelpFrame(wx.Frame):
                 return
             path = dd.GetPath()
         wx.BeginBusyCursor()
+        report = None
         try:
-            text = efi_checker.check(path, self.constants).text()
+            report = efi_checker.check(path, self.constants)
+            text = report.text()
         except Exception as e:
             text = f"Couldn't check that EFI: {e}"
         finally:
             wx.EndBusyCursor()
         self._show_text("EFI Check", text)
+        if report and any(k.enabled and not k.missing and k.state.startswith("update") for k in report.kexts):
+            ask = wx.MessageDialog(self.dialog, "Update the outdated kexts now?\n\nThe whole EFI folder is backed up first; "
+                                   "config.plist is not changed.", "Update kexts", style=wx.YES_NO | wx.ICON_QUESTION)
+            if ask.ShowModal() == wx.ID_YES:
+                wx.BeginBusyCursor()
+                try:
+                    updated = efi_checker.update_kexts(path, self.constants)
+                    message = "Updated:\n" + "\n".join(updated) if updated else "Nothing needed updating."
+                except Exception as e:
+                    message = f"Update failed (your backup is untouched): {e}"
+                finally:
+                    wx.EndBusyCursor()
+                wx.MessageBox(message, "Update kexts", wx.OK | wx.ICON_INFORMATION)

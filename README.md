@@ -62,7 +62,7 @@ OpenCore Legacy Patcher (OCLP) helps **old Macs** run new macOS, and it runs onl
 | **Installer USB** | Downloads macOS Recovery straight from Apple and writes a bootable USB with your EFI on it. |
 | **Compatibility report** | Shows every macOS version, High Sierra to Golden Gate, with whether your PC can run it and which Mac model it would use. |
 | **macOS inspector** | Checks any macOS install for Intel support. This is how Golden Gate was diagnosed as Apple-silicon only. |
-| **EFI checker** | Checks any existing OpenCore EFI: outdated kexts, missing files, `ocvalidate` results. |
+| **EFI checker + updater** | Checks any existing OpenCore EFI (outdated kexts, missing files, `ocvalidate`), then updates the kexts in place after making a backup. |
 | **Stable serials** | Generated serial numbers are saved and reused, so rebuilding doesn't make iMessage/FaceTime see a "new Mac". |
 
 ---
@@ -269,6 +269,8 @@ Problems:
 Summary: 1 kext update(s) available, 1 problem(s).
 ```
 
+**EFI updater:** `--update-efi PATH`, or answer *Yes* to "Update the outdated kexts now?" after a GUI check. The whole EFI is copied to `EFI-backup-<date-time>` first; then each outdated kext bundle is swapped for its latest release. `config.plist`, serials, ACPI and drivers are not touched.
+
 ---
 
 ## 🖥 KVM / QEMU virtual machines
@@ -365,6 +367,7 @@ OpenCore-Modernity-Patcher --build --smbios MacPro7,1 --debug-opencore
 | `--compat` | Show which macOS versions this PC (or `--profile`) can run. |
 | `--inspect-macos [PATH]` | Check whether a macOS install (default: this Mac, `/`) can still run on PCs. |
 | `--check-efi PATH` | Check an existing EFI folder for kext updates, missing files and `ocvalidate` errors. |
+| `--update-efi PATH` | Back up an EFI folder, then replace its outdated kexts with the latest releases (config.plist untouched). |
 
 Set `GITHUB_TOKEN` to avoid GitHub's 60-requests-per-hour limit when building often.
 

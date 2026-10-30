@@ -149,3 +149,39 @@ def _ocvalidate(net, config_path: Path) -> Optional[str]:
     text = (result.stdout + result.stderr).strip()
     lines = [l for l in text.splitlines() if l.strip() and not l.startswith("NOTE:")]
     return "\n".join(lines[-12:]) or "no output"
+
+
+def update_kexts(efi: Path, constants) -> List[str]:
+    """
+    Replace outdated tracked kexts with the latest releases, after backing up the EFI
+
+    config.plist is left alone: bundle names and paths don't change between
+    kext releases, and plug-ins come along inside their parent bundle.
+    """
+    import shutil
+    import time
+    from .efi_builder.build import BuildOpenCore
+
+    report = check(efi, constants)
+    outdated = [k for k in report.kexts if k.enabled and not k.missing and k.state.startswith("update")]
+    if not outdated:
+        return []
+    root = report.root
+    backup = root.parent / f"EFI-backup-{time.strftime('%Y%m%d-%H%M%S')}"
+    shutil.copytree(root, backup)
+    logging.info(f"- Backed up EFI to {backup}")
+
+    net = network_handler.NetworkHandler(constants)
+    updated = []
+    for kext in outdated:
+        info = kext_data.KEXTS[kext.name]
+        source = BuildOpenCore._find_bundle(net.extract(net.release_asset(info["repo"], info["asset"])), f"{kext.name}.kext")
+        if source is None:
+            logging.info(f"- {kext.name}.kext not found in its latest release; left as is")
+            continue
+        target = root / "OC" / "Kexts" / f"{kext.name}.kext"
+        shutil.rmtree(target)
+        shutil.copytree(source, target)
+        updated.append(f"{kext.name} {kext.installed} -> {kext.latest}")
+        logging.info(f"- Updated {kext.name} {kext.installed} -> {kext.latest}")
+    return updated

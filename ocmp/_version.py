@@ -7,6 +7,6 @@ CI rewrites this file from the git tag before packaging:
   untagged commits  -> CHANNEL = "Nightly"
 """
 
-VERSION = "0.1.0-beta.4"
+VERSION = "0.1.0-beta.5"
 CHANNEL = "Development"
 COMMIT  = ""

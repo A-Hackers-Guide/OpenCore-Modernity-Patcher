@@ -101,3 +101,29 @@ def test_saved_serial_is_reused(tmp_path, monkeypatch):
     assert smbios["SystemSerialNumber"] == "C02ABCDEFGHI"
     assert smbios["SystemUUID"] == "UUID-1"
     assert smbios["ROM"] == bytes.fromhex("020000000001")
+
+
+def test_update_kexts_backs_up_and_replaces(tmp_path, monkeypatch):
+    from ocmp import efi_checker, network_handler
+    efi = tmp_path / "EFI"
+    for name, version in (("Lilu", "1.6.0"), ("WhateverGreen", "1.7.1")):
+        info = efi / "OC" / "Kexts" / f"{name}.kext" / "Contents"
+        info.mkdir(parents=True)
+        (info / "Info.plist").write_bytes(plistlib.dumps({"CFBundleVersion": version}))
+    (efi / "OC" / "config.plist").write_bytes(plistlib.dumps({"Kernel": {"Add": [
+        {"BundlePath": "Lilu.kext", "Enabled": True}, {"BundlePath": "WhateverGreen.kext", "Enabled": True}]}}))
+    release = tmp_path / "release" / "Lilu.kext" / "Contents"
+    release.mkdir(parents=True)
+    (release / "Info.plist").write_bytes(plistlib.dumps({"CFBundleVersion": "1.7.2"}))
+    monkeypatch.setattr(network_handler.NetworkHandler, "latest_release",
+                        lambda self, repo: {"tag_name": "1.7.2" if "Lilu" in repo else "1.7.1", "assets": []})
+    monkeypatch.setattr(network_handler.NetworkHandler, "release_asset", lambda self, repo, m: tmp_path / "release.zip")
+    monkeypatch.setattr(network_handler.NetworkHandler, "extract", lambda self, a: tmp_path / "release")
+    monkeypatch.setattr(efi_checker, "_ocvalidate", lambda net, path: None)
+    c = constants.Constants()
+    c.data_path = c.cache_path = tmp_path / "data"
+    assert efi_checker.update_kexts(efi, c) == ["Lilu 1.6.0 -> 1.7.2"]
+    with open(efi / "OC" / "Kexts" / "Lilu.kext" / "Contents" / "Info.plist", "rb") as f:
+        assert plistlib.load(f)["CFBundleVersion"] == "1.7.2"
+    backups = list(tmp_path.glob("EFI-backup-*"))
+    assert len(backups) == 1 and (backups[0] / "OC" / "Kexts" / "Lilu.kext").exists()

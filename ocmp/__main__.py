@@ -43,6 +43,7 @@ def main(argv=None) -> int:
     parser.add_argument("--inspect-macos", nargs="?", const="/", metavar="PATH",
                         help="check whether a macOS install (default: this Mac) can still run on PCs")
     parser.add_argument("--check-efi", type=Path, metavar="PATH", help="check an existing EFI folder for updates and problems")
+    parser.add_argument("--update-efi", type=Path, metavar="PATH", help="back up an EFI, then update its outdated kexts")
     parser.add_argument("--version", action="version", version=f"{constants.APP_NAME} {constants.APP_VERSION}")
     args = parser.parse_args(argv)
 
@@ -62,6 +63,13 @@ def main(argv=None) -> int:
     if args.inspect_macos:
         from . import macos_inspector
         print(macos_inspector.inspect(Path(args.inspect_macos)).report())
+        return 0
+
+    if args.update_efi:
+        from . import efi_checker
+        updated = efi_checker.update_kexts(args.update_efi, c)
+        print("\n".join(updated) if updated else "All tracked kexts are already up to date.")
+        print(efi_checker.check(args.update_efi, c).text())
         return 0
 
     if args.check_efi:

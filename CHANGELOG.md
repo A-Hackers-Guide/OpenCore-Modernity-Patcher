@@ -4,6 +4,11 @@ All notable changes to OpenCore Modernity Patcher. Versions follow [Semantic Ver
 
 ## [Unreleased]
 
+## [0.1.0-beta.5] - 2026-10-30
+
+### Added
+- **Update kexts in place** (`--update-efi PATH`, or *Support → Check an Existing EFI* → *Update kexts*): backs up the whole EFI folder to `EFI-backup-<date-time>`, then swaps each outdated kext for its latest release. `config.plist`, serials and everything else stay as they are. Verified on a real EFI: Lilu 1.6.0 → 1.7.2, backup created, re-check clean.
+
 ## [0.1.0-beta.4] - 2026-10-30
 
 ### Added
