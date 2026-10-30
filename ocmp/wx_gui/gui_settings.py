@@ -41,9 +41,10 @@ class SettingsFrame(wx.Frame):
         sizer.Add(target_label, 0, wx.ALIGN_CENTRE | wx.TOP, 10)
 
         self.versions = sorted(os_data.MARKETING_NAMES.keys(), reverse=True)
-        target_choice = wx.Choice(frame, choices=[os_data.label(v) for v in self.versions], size=(220, -1))
+        target_choice = wx.Choice(frame, choices=[os_data.label(v) + ("" if os_data.pc_supported(v) else " - Apple silicon only")
+                                                  for v in self.versions], size=(300, -1))
         target_choice.SetSelection(self.versions.index(os_data.os_data(self.constants.target_os)))
-        target_choice.Bind(wx.EVT_CHOICE, lambda event: setattr(self.constants, "target_os", int(self.versions[event.GetSelection()])))
+        target_choice.Bind(wx.EVT_CHOICE, lambda event: self.on_target(event, target_choice))
         sizer.Add(target_choice, 0, wx.ALIGN_CENTRE | wx.TOP, 4)
 
         target_desc = wx.StaticText(frame, label="macOS version the EFI is built for. Kexts, SMBIOS and quirks adjust to it.")
@@ -172,6 +173,8 @@ class SettingsFrame(wx.Frame):
                 "System UUID": {"type": "text", "variable": "custom_uuid", "description": ["Leave empty to generate."]},
                 "ROM (MAC address)": {"type": "text", "variable": "custom_rom",
                                       "description": ["12 hex digits. Empty = your Ethernet MAC or a random one."]},
+                "Generate new serial": {"type": "button", "function": self.on_new_serial,
+                                        "description": ["Serials are saved and reused on every rebuild.", "Clear them to get new ones on the next build."]},
             },
             "Advanced": {
                 "Advanced": {"type": "title"},
@@ -183,6 +186,21 @@ class SettingsFrame(wx.Frame):
                                          "description": ["Re-download OpenCore and kexts on the next build."]},
             },
         }
+
+    def on_target(self, event: wx.Event, choice: wx.Choice) -> None:
+        kernel = int(self.versions[event.GetSelection()])
+        if not os_data.pc_supported(kernel):
+            wx.MessageBox(os_data.GOLDEN_GATE_DIAGNOSIS, "Not available on PCs", wx.OK | wx.ICON_INFORMATION)
+            choice.SetSelection(self.versions.index(os_data.os_data(self.constants.target_os)))
+            return
+        self.constants.target_os = kernel
+
+    def on_new_serial(self, event: wx.Event) -> None:
+        import shutil
+        shutil.rmtree(self.constants.data_path / "smbios", ignore_errors=True)
+        wx.MessageBox("Saved serial numbers cleared. The next build generates new ones.\n\n"
+                      "Only do this before installing macOS, or iMessage/FaceTime will see a new Mac.",
+                      "Serials cleared", wx.OK | wx.ICON_INFORMATION)
 
     def on_checkbox(self, event: wx.Event, setting: dict) -> None:
         setattr(self.constants, setting["variable"], event.IsChecked())

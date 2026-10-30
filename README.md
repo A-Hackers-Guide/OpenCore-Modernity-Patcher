@@ -13,12 +13,12 @@ The interface works like OpenCore Legacy Patcher. The target is different: Intel
 ![Linux](https://img.shields.io/badge/Linux-AppImage-FCC624?style=flat-square&logo=linux&logoColor=black)
 ![macOS targets](https://img.shields.io/badge/targets-High%20Sierra%20→%20Tahoe-000?style=flat-square&logo=apple)
 
-[Download](#-download) · [Quick start](#-quick-start) · [Supported hardware](#-supported-hardware) · [macOS Tahoe](#-macos-tahoe-26) · [KVM](#-kvm--qemu-virtual-machines) · [Known limitations](#-known-limitations) · [Credits](#-credits)
+[Download](#-download) · [Quick start](#-quick-start) · [Supported hardware](#-supported-hardware) · [macOS Tahoe](#-macos-tahoe-26) · [Golden Gate](#-macos-golden-gate-27-why-pcs-cant-run-it) · [KVM](#-kvm--qemu-virtual-machines) · [Known limitations](#-known-limitations) · [Credits](#-credits)
 
 </div>
 
 > [!WARNING]
-> **Early software.** Version 0.1 has only been checked with `ocvalidate` and simulated hardware profiles. It has **not yet been booted on real hardware**. Keep your current EFI and a backup of your data until releases are marked **Stable**.
+> **Early software.** Version 0.1 has only been checked with `ocvalidate`, simulated hardware profiles and a real macOS 27 install (for the Golden Gate diagnosis). It has **not yet been booted on real hardware**. Keep your current EFI and a backup of your data until releases are marked **Stable**.
 
 ---
 
@@ -31,6 +31,8 @@ The interface works like OpenCore Legacy Patcher. The target is different: Intel
 5. [The interface, window by window](#-the-interface-window-by-window)
 6. [Supported hardware](#-supported-hardware)
 7. [macOS Tahoe (26)](#-macos-tahoe-26)
+   - [macOS Golden Gate (27): why PCs can't run it](#-macos-golden-gate-27-why-pcs-cant-run-it)
+   - [Tools: compatibility report, macOS inspector, EFI checker](#-tools-compatibility-report-macos-inspector-efi-checker)
 8. [KVM / QEMU virtual machines](#-kvm--qemu-virtual-machines)
 9. [How a build is decided](#-how-a-build-is-decided)
 10. [What ends up in the EFI](#-what-ends-up-in-the-efi)
@@ -58,6 +60,10 @@ OpenCore Legacy Patcher (OCLP) helps **old Macs** run new macOS, and it runs onl
 | **Build** | Writes `config.plist` from the same OpenCore release's `Sample.plist`, generates serial numbers with `macserial`, assembles `EFI/`, and **validates it with `ocvalidate`**. |
 | **Install** | Copies the EFI to a disk's EFI partition, keeping a backup and leaving Windows and Linux boot loaders untouched. |
 | **Installer USB** | Downloads macOS Recovery straight from Apple and writes a bootable USB with your EFI on it. |
+| **Compatibility report** | Shows every macOS version, High Sierra to Golden Gate, with whether your PC can run it and which Mac model it would use. |
+| **macOS inspector** | Checks any macOS install for Intel support. This is how Golden Gate was diagnosed as Apple-silicon only. |
+| **EFI checker** | Checks any existing OpenCore EFI: outdated kexts, missing files, `ocvalidate` results. |
+| **Stable serials** | Generated serial numbers are saved and reused, so rebuilding doesn't make iMessage/FaceTime see a "new Mac". |
 
 ---
 
@@ -209,6 +215,60 @@ Tahoe-specific limits:
 - Kaby Lake and older iGPUs have no Tahoe drivers. You need a supported AMD dGPU.
 - Broadcom Wi-Fi and NVIDIA Kepler need root patches that only macOS itself can apply.
 
+### 🌉 macOS Golden Gate (27): why PCs can't run it
+
+**Short answer: Golden Gate is Apple-silicon only, so no Intel or AMD PC, laptop or VM can run it. macOS Tahoe (26) is the last macOS for PCs.**
+
+This was checked on a real Mac running **macOS 27.0.1 (build 26A434, Darwin 27.0.0)** with the app's own inspector (`--inspect-macos`):
+
+| What a PC needs | macOS Tahoe 26 | macOS Golden Gate 27 |
+|---|---|---|
+| Built-in apps with Intel (x86_64) code | all of them | **2 of 186**: only *Installer* and *Automator Installer* |
+| Intel kernel collection `/System/Library/KernelCollections/BootKernelExtensions.kc` | ✅ | ❌ **missing** |
+| Intel/AMD graphics drivers (AMDRadeonX6000, AppleIntel…Graphics) | ✅ | ❌ **none** |
+| Intel CPU power management (X86PlatformPlugin) | ✅ | ❌ **none** |
+| Intel kernel | ✅ | ⚠️ one `RELEASE_X86_64` kernel is still on disk, but it can't boot without the kernel collection and drivers |
+| Newest macOS Apple's recovery catalog offers any Intel Mac | 26.x | **26.7**: no Intel Mac is offered 27 |
+| Darwin version | 25 | **27**: Darwin skipped 26 to match the macOS number |
+
+What the app does about it:
+
+- **Golden Gate shows up in the target list**, labelled *Apple silicon only*. Selecting it shows this explanation instead of building.
+- `--target "golden gate"` (or `goldengate`, `27`) fails with the same explanation instead of producing an EFI that could never boot.
+- The **compatibility report** lists Golden Gate as "No" for every PC.
+- **Run the inspector yourself** on any Mac or mounted macOS volume to re-check future versions: `OpenCore-Modernity-Patcher --inspect-macos /`
+
+### 🧰 Tools: compatibility report, macOS inspector, EFI checker
+
+All three are in **Support** (GUI) and on the command line.
+
+**Compatibility report:** `--compat` (with `--profile` to check another machine):
+
+```
+Compatibility for: ASUS ROG STRIX B550-F GAMING
+  macOS Golden Gate (27)     No     macOS Golden Gate (27) is Apple-silicon only and can't run on any PC
+  macOS Tahoe (26)           Yes    MacPro7,1
+  macOS Sequoia (15)         Yes    MacPro7,1
+  ...
+  macOS Big Sur (11)         No     No usable GPU          ← RX 6600 (Navi 23) needs Monterey+
+Newest macOS for this PC: macOS Tahoe (26) as MacPro7,1
+```
+
+**macOS inspector:** `--inspect-macos [PATH]` checks a macOS system volume (default `/`) for Intel apps, Intel kernel, kernel collection and PC drivers. It parses Mach-O headers itself, so it also works on Windows or Linux against a copied or mounted system folder.
+
+**EFI checker:** `--check-efi PATH` works on any OpenCore EFI, including hand-made ones:
+
+```
+OpenCore: 1.0.8  up to date
+SMBIOS:   MacPro7,1  (newest macOS for this model: macOS Tahoe)
+Kexts:
+  Lilu        1.6.0   update available (1.7.2)
+  NVMeFix             MISSING on disk
+Problems:
+  - NVMeFix.kext is enabled in config.plist but not in OC/Kexts.
+Summary: 1 kext update(s) available, 1 problem(s).
+```
+
 ---
 
 ## 🖥 KVM / QEMU virtual machines
@@ -276,7 +336,9 @@ Build-Folder/
         └── Tools/
 ```
 
-Serial numbers are generated fresh by OpenCore's `macserial` on every build unless you set your own in **Settings → SMBIOS**. Keep the same serial once macOS is installed, or iMessage/FaceTime will treat it as a new Mac.
+Serial numbers come from OpenCore's `macserial` on the **first** build for each Mac model. They're saved in the data folder (`smbios/<model>.json`) and **reused on every rebuild**, so iMessage/FaceTime keep seeing the same Mac. Use **Settings → SMBIOS → Generate new serial** to start over (only before installing macOS), or type your own.
+
+Each EFI also carries `EFI/OC/.ocmp-build.json` (app version, OpenCore version, target, SMBIOS), which the EFI checker reads.
 
 ---
 
@@ -300,6 +362,9 @@ OpenCore-Modernity-Patcher --build --smbios MacPro7,1 --debug-opencore
 | `--smbios MODEL` | Force a Mac model. |
 | `--output DIR` | Where to write `EFI/` and `BuildReport.txt`. |
 | `--debug-opencore` | Use the DEBUG OpenCore build with logging. |
+| `--compat` | Show which macOS versions this PC (or `--profile`) can run. |
+| `--inspect-macos [PATH]` | Check whether a macOS install (default: this Mac, `/`) can still run on PCs. |
+| `--check-efi PATH` | Check an existing EFI folder for kext updates, missing files and `ocvalidate` errors. |
 
 Set `GITHUB_TOKEN` to avoid GitHub's 60-requests-per-hour limit when building often.
 

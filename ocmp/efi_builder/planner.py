@@ -92,6 +92,8 @@ class Planner:
         self.c = constants
 
     def plan(self) -> BuildPlan:
+        if not os_data.pc_supported(self.c.target_os):
+            raise PlanError(os_data.GOLDEN_GATE_DIAGNOSIS)
         platform = self._platform()
         plan = BuildPlan(platform=platform, smbios="", target_os=int(self.c.target_os))
 

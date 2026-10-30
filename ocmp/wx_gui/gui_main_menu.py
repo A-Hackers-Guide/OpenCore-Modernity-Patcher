@@ -230,6 +230,8 @@ class MainFrame(wx.Frame):
             lines.append(f"Board: {pc.board}")
         lines += [f"GPU: {g.name or g.pci_id} [{g.arch}]" for g in pc.gpus]
         lines += [f"{n.kind.title()}: {n.name or n.pci_id}" for n in pc.nics]
+        from .. import compatibility
+        lines += ["", compatibility.summary(pc, self.constants)]
         return "\n".join(lines)
 
     def on_credits(self, event: wx.Event = None):

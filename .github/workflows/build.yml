@@ -81,6 +81,23 @@ jobs:
 
       - run: pip install pyinstaller==6.22.3
 
+      - name: GUI smoke test (import every window, open the main menu)
+        if: runner.os == 'Linux'
+        run: |
+          xvfb-run -a python - <<'PY'
+          import importlib, pkgutil, wx
+          import ocmp.wx_gui as gui
+          for m in pkgutil.iter_modules(gui.__path__):
+              importlib.import_module(f"ocmp.wx_gui.{m.name}")
+          from ocmp import constants, hardware
+          from ocmp.wx_gui import gui_main_menu
+          c = constants.Constants(); c.computer = hardware.HardwareProfile.load("examples/profiles/amd-ryzen5600x-rx6600.json")
+          app = wx.App(False)
+          frame = gui_main_menu.MainFrame(None, title="smoke", global_constants=c)
+          frame.Show(); wx.CallLater(500, frame.Destroy); app.MainLoop()
+          print("GUI smoke test passed")
+          PY
+
       - name: Render icons
         shell: bash
         run: |

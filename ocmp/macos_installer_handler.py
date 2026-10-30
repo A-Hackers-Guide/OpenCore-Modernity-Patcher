@@ -39,6 +39,7 @@ MAJOR_TO_KERNEL = {
     "10.13": os_data.os_data.high_sierra, "10.14": os_data.os_data.mojave, "10.15": os_data.os_data.catalina,
     "11": os_data.os_data.big_sur, "12": os_data.os_data.monterey, "13": os_data.os_data.ventura,
     "14": os_data.os_data.sonoma, "15": os_data.os_data.sequoia, "26": os_data.os_data.tahoe,
+    "27": os_data.os_data.golden_gate,
 }
 
 

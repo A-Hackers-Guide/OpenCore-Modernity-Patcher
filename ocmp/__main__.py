@@ -24,7 +24,8 @@ def _logging(c: constants.Constants) -> None:
 
 def _target(value: str) -> int:
     for kernel, (marketing, number) in os_data.MARKETING_NAMES.items():
-        if value.lower() in (marketing.lower(), marketing.split()[-1].lower(), number, str(int(kernel))):
+        short = marketing.lower().replace("macos ", "")
+        if value.lower().replace("-", " ").strip() in (marketing.lower(), short, short.replace(" ", ""), number, str(int(kernel))):
             return int(kernel)
     raise argparse.ArgumentTypeError(f"unknown macOS version '{value}'")
 
@@ -38,6 +39,10 @@ def main(argv=None) -> int:
     parser.add_argument("--smbios", help="override the SMBIOS model, e.g. MacPro7,1")
     parser.add_argument("--output", type=Path, help="where to write the EFI folder")
     parser.add_argument("--debug-opencore", action="store_true", help="use the DEBUG OpenCore build")
+    parser.add_argument("--compat", action="store_true", help="show which macOS versions this PC (or --profile) can run")
+    parser.add_argument("--inspect-macos", nargs="?", const="/", metavar="PATH",
+                        help="check whether a macOS install (default: this Mac) can still run on PCs")
+    parser.add_argument("--check-efi", type=Path, metavar="PATH", help="check an existing EFI folder for updates and problems")
     parser.add_argument("--version", action="version", version=f"{constants.APP_NAME} {constants.APP_VERSION}")
     args = parser.parse_args(argv)
 
@@ -54,6 +59,16 @@ def main(argv=None) -> int:
     if args.output:
         c.build_path = args.output.resolve()
 
+    if args.inspect_macos:
+        from . import macos_inspector
+        print(macos_inspector.inspect(Path(args.inspect_macos)).report())
+        return 0
+
+    if args.check_efi:
+        from . import efi_checker
+        print(efi_checker.check(args.check_efi, c).text())
+        return 0
+
     if args.save_profile:
         profile = hardware.detect()
         profile.save(args.save_profile)
@@ -64,6 +79,11 @@ def main(argv=None) -> int:
     c.computer = hardware.HardwareProfile.load(args.profile) if args.profile else hardware.detect()
     if args.profile:
         c.custom_profile_path = args.profile
+
+    if args.compat:
+        from . import compatibility
+        print(compatibility.report(c.computer, c))
+        return 0
 
     if args.build:
         from .efi_builder import build, planner

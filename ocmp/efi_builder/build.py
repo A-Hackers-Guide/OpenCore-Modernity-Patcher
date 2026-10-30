@@ -6,6 +6,7 @@ write config.plist, copy files, then validate with ocvalidate.
 """
 
 import re
+import json
 import sys
 import uuid
 import shutil
@@ -85,6 +86,10 @@ class BuildOpenCore:
 
         self._validate(ocpkg, config_path)
         self._write_report(efi.parent)
+        (efi / "OC" / ".ocmp-build.json").write_text(json.dumps({
+            "app_version": self.c.patcher_version, "opencore": self.opencore_version, "build": self.c.opencore_build,
+            "target": int(self.plan.target_os), "smbios": self.plan.smbios, "platform": self.plan.platform,
+        }, indent=2), encoding="utf-8")
 
         for warning in self.plan.warnings:
             logging.info(f"WARNING: {warning}")
@@ -100,6 +105,7 @@ class BuildOpenCore:
         build = self.c.opencore_build
         archive = self.net.release_asset("acidanthera/OpenCorePkg", lambda n: n.endswith(f"-{build}.zip"))
         folder = self.net.extract(archive)
+        self.opencore_version = self.net.latest_release("acidanthera/OpenCorePkg")["tag_name"]
         logging.info(f"- Using {archive.name}")
         return folder
 
@@ -194,13 +200,30 @@ class BuildOpenCore:
     # ---- SMBIOS ----
 
     def _smbios(self, ocpkg: Path) -> dict:
+        """
+        Serial, MLB, UUID and ROM are saved per model and reused on rebuilds,
+        so iMessage/FaceTime keep seeing the same Mac
+        """
         model = self.plan.smbios
+        store = self.c.data_path / "smbios" / f"{model.replace(',', '_')}.json"
+        saved = {}
+        if store.exists():
+            try:
+                saved = json.loads(store.read_text(encoding="utf-8"))
+            except ValueError:
+                saved = {}
         serial, mlb = self.c.custom_serial, self.c.custom_board_serial
         if not (serial and mlb):
+            serial, mlb = saved.get("serial", ""), saved.get("mlb", "")
+        reused = bool(serial and mlb) and not self.c.custom_serial
+        if not (serial and mlb):
             serial, mlb = self._macserial(ocpkg, model)
-        rom = self._rom()
-        system_uuid = self.c.custom_uuid or str(uuid.uuid4()).upper()
-        logging.info(f"- Generated SMBIOS for {model} (serial {serial[:4]}…)")
+        system_uuid = self.c.custom_uuid or saved.get("uuid") or str(uuid.uuid4()).upper()
+        rom = self._rom() if (self.c.custom_rom or not saved.get("rom")) else bytes.fromhex(saved["rom"])
+        store.parent.mkdir(parents=True, exist_ok=True)
+        store.write_text(json.dumps({"model": model, "serial": serial, "mlb": mlb, "uuid": system_uuid, "rom": rom.hex()},
+                                    indent=2), encoding="utf-8")
+        logging.info(f"- {'Reused saved' if reused else 'Generated'} SMBIOS for {model} (serial {serial[:4]}…)")
         return {
             "SystemProductName": model,
             "SystemSerialNumber": serial,

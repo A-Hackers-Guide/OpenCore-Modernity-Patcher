@@ -4,6 +4,22 @@ All notable changes to OpenCore Modernity Patcher. Versions follow [Semantic Ver
 
 ## [Unreleased]
 
+## [0.1.0-beta.3] - 2026-10-30
+
+Second "First Light" pre-release: macOS Golden Gate diagnosis and three new tools.
+
+### Added
+- **macOS Golden Gate (27) diagnosis.** Checked on a real macOS 27.0.1 (26A434) install: Golden Gate is Apple-silicon only. It has no Intel kernel collection and no Intel/AMD GPU or X86 power-management drivers, only 2 of 186 built-in apps (the Installers) keep Intel code, and Apple offers no Intel Mac anything past 26.7. Golden Gate is now a known target (Darwin 27) that is refused with this explanation in the GUI, the CLI and the compatibility report. Tahoe is confirmed as the last macOS for PCs.
+- **macOS inspector** (`--inspect-macos [PATH]`, *Support → Check a macOS Install*): pure-Python Mach-O parsing reports whether any macOS install can still run on PCs. Works on Windows/Linux against a copied system folder.
+- **Compatibility report** (`--compat`, *Support → Compatibility Report*, and a summary in *Detect Hardware*): runs the planner for every macOS version and shows the newest one the PC can run and with which SMBIOS.
+- **EFI checker** (`--check-efi PATH`, *Support → Check an Existing EFI*): checks any OpenCore EFI for outdated kexts and OpenCore, enabled-but-missing kexts/drivers/SSDTs, and runs `ocvalidate`.
+- **Stable serial numbers:** SMBIOS serial, MLB, UUID and ROM are saved per model and reused on every rebuild. *Settings → SMBIOS → Generate new serial* starts over.
+- Every EFI records its build info in `EFI/OC/.ocmp-build.json`.
+- `--target` accepts multi-word names (`"golden gate"`, `goldengate`, `27`).
+
+### Tests
+- 16 tests (was 10): synthetic thin/universal Mach-O binaries, Apple-silicon-only vs Intel-capable system volumes, Golden Gate refusal, compatibility ordering, serial reuse.
+
 ## [0.1.0-beta.2] - 2026-10-30
 
 First public pre-release, codename **"First Light"**. Tested with `ocvalidate` and simulated hardware profiles only. **Not yet booted on real hardware.**
