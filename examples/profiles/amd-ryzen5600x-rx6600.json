@@ -1,0 +1,51 @@
+{
+  "cpu_vendor": "AMD",
+  "cpu_name": "AMD Ryzen 5 5600X 6-Core Processor",
+  "cpu_family": 25,
+  "cpu_model": 33,
+  "cpu_stepping": 0,
+  "cpu_cores": 6,
+  "cpu_threads": 12,
+  "manufacturer": "ASUS",
+  "model": "System Product Name",
+  "board": "ROG STRIX B550-F GAMING",
+  "mac_address": "",
+  "gpus": [
+    {
+      "vendor_id": 4098,
+      "device_id": 29695,
+      "name": "AMD Radeon RX 6600",
+      "kind": "gpu",
+      "arch": "",
+      "location": "PciRoot(0x0)/Pci(0x3,0x1)/Pci(0x0,0x0)/Pci(0x0,0x0)/Pci(0x0,0x0)"
+    }
+  ],
+  "nics": [
+    {
+      "vendor_id": 4332,
+      "device_id": 33061,
+      "name": "Realtek RTL8125 2.5GbE",
+      "kind": "ethernet",
+      "arch": "",
+      "location": ""
+    },
+    {
+      "vendor_id": 32902,
+      "device_id": 10019,
+      "name": "Intel Wi-Fi 6 AX200",
+      "kind": "wifi",
+      "arch": "",
+      "location": ""
+    },
+    {
+      "vendor_id": 32903,
+      "device_id": 41,
+      "name": "Intel Wireless Bluetooth",
+      "kind": "bluetooth",
+      "arch": "",
+      "location": ""
+    }
+  ],
+  "other": [],
+  "source": "Example profile"
+}

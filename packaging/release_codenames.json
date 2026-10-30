@@ -1,0 +1,9 @@
+{
+  "_comment": "One codename per minor version. A release title looks like: OpenCore Modernity Patcher 0.1.0 Beta 1 \"First Light\" (Pre-release)",
+  "0.1": "First Light",
+  "0.2": "Second Sunrise",
+  "0.3": "Third Horizon",
+  "0.4": "Fourth Frontier",
+  "0.5": "Fifth Element",
+  "1.0": "Modernity"
+}

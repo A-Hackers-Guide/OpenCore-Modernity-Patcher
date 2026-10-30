@@ -1,0 +1,42 @@
+{
+  "cpu_vendor": "Intel",
+  "cpu_name": "12th Gen Intel(R) Core(TM) i5-12600K",
+  "cpu_family": 6,
+  "cpu_model": 151,
+  "cpu_stepping": 2,
+  "cpu_cores": 10,
+  "cpu_threads": 16,
+  "manufacturer": "MSI",
+  "model": "MS-7D25",
+  "board": "PRO Z690-A",
+  "gpus": [
+    {
+      "vendor_id": 32902,
+      "device_id": 18048,
+      "name": "Intel UHD Graphics 770",
+      "kind": "gpu",
+      "arch": "",
+      "location": "PciRoot(0x0)/Pci(0x2,0x0)"
+    },
+    {
+      "vendor_id": 4318,
+      "device_id": 9476,
+      "name": "NVIDIA GeForce RTX 3060",
+      "kind": "gpu",
+      "arch": "",
+      "location": "PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)"
+    }
+  ],
+  "nics": [
+    {
+      "vendor_id": 32902,
+      "device_id": 5619,
+      "name": "Intel(R) Ethernet Controller I225-V",
+      "kind": "ethernet",
+      "arch": "",
+      "location": "PciRoot(0x0)/Pci(0x1C,0x2)/Pci(0x0,0x0)"
+    }
+  ],
+  "other": [],
+  "source": "Example profile"
+}

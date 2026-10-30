@@ -1,0 +1,147 @@
+# Build OpenCore Modernity Patcher for Windows (.exe) and Linux (.AppImage)
+#
+# Three channels, kept strictly apart:
+#   push / pull request (no tag)   -> Nightly:     artifacts on the workflow run only, never a GitHub release
+#   tag vX.Y.Z-alpha.N|beta.N|rc.N -> Pre-release: GitHub release marked "Pre-release", never "Latest"
+#   tag vX.Y.Z                     -> Stable:      GitHub release marked "Latest"
+# Any other tag fails the run (see packaging/release_info.py).
+
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pytest pyflakes
+      - run: python -m pyflakes ocmp tests packaging/release_info.py
+      - run: python -m pytest -q tests
+
+  build:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: Windows-x64
+            ext: exe
+          - os: ubuntu-22.04
+            platform: Linux-x86_64
+            ext: AppImage
+    runs-on: ${{ matrix.os }}
+    outputs:
+      version: ${{ steps.info.outputs.version }}
+      channel: ${{ steps.info.outputs.channel }}
+      prerelease: ${{ steps.info.outputs.prerelease }}
+      is_release: ${{ steps.info.outputs.is_release }}
+      title: ${{ steps.info.outputs.title }}
+      tag: ${{ steps.info.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Work out version, channel and release name
+        id: info
+        shell: bash
+        run: python packaging/release_info.py "${GITHUB_REF}" "${GITHUB_SHA}"
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-0 libnotify4 libsdl2-2.0-0 libxtst6 libwebkit2gtk-4.0-37 file
+          pip install -f https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-22.04/ wxPython==4.2.2
+
+      - name: Install Windows build dependencies
+        if: runner.os == 'Windows'
+        run: pip install wxPython
+
+      - run: pip install pyinstaller==6.22.3
+
+      - name: Render icons
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then xvfb-run -a python packaging/make_icons.py; else python packaging/make_icons.py; fi
+
+      - name: Package with PyInstaller
+        run: pyinstaller --noconfirm --clean packaging/ocmp.spec
+
+      - name: Smoke test (CLI starts and reports its version)
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            ./dist/OpenCore-Modernity-Patcher.exe --version > version.txt 2>&1 || true
+            cat version.txt
+          else
+            ./dist/OpenCore-Modernity-Patcher/OpenCore-Modernity-Patcher --version
+          fi
+
+      - name: Name the Windows executable
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          mkdir -p out
+          cp dist/OpenCore-Modernity-Patcher.exe "out/OpenCore-Modernity-Patcher-${{ steps.info.outputs.version }}-${{ matrix.platform }}.exe"
+
+      - name: Build the AppImage
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p out
+          bash packaging/build_appimage.sh "out/OpenCore-Modernity-Patcher-${{ steps.info.outputs.version }}-${{ matrix.platform }}.AppImage"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}
+          path: out/*
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Linux'
+        with:
+          name: release-notes
+          path: release-notes.md
+
+  release:
+    needs: build
+    if: needs.build.outputs.is_release == 'true'
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Collect files and checksums
+        run: |
+          mkdir -p upload
+          find artifacts -type f \( -name '*.exe' -o -name '*.AppImage' \) -exec cp {} upload/ \;
+          (cd upload && sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt)
+
+      - name: Publish ${{ needs.build.outputs.channel }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.build.outputs.tag }}
+          name: ${{ needs.build.outputs.title }}
+          body_path: artifacts/release-notes/release-notes.md
+          prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
+          make_latest: ${{ needs.build.outputs.prerelease == 'true' && 'false' || 'true' }}
+          files: upload/*
+          fail_on_unmatched_files: true

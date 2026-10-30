@@ -1,0 +1,35 @@
+{
+  "cpu_vendor": "AMD",
+  "cpu_name": "AMD Ryzen 9 7950X 16-Core Processor",
+  "cpu_family": 25,
+  "cpu_model": 97,
+  "cpu_stepping": 2,
+  "cpu_cores": 8,
+  "cpu_threads": 16,
+  "is_vm": true,
+  "hypervisor": "KVM",
+  "manufacturer": "QEMU",
+  "model": "Standard PC (Q35 + ICH9, 2009)",
+  "gpus": [
+    {
+      "vendor_id": 4660,
+      "device_id": 4369,
+      "name": "QEMU Standard VGA",
+      "kind": "gpu",
+      "arch": "",
+      "location": ""
+    }
+  ],
+  "nics": [
+    {
+      "vendor_id": 6900,
+      "device_id": 4161,
+      "name": "Virtio network device",
+      "kind": "ethernet",
+      "arch": "",
+      "location": ""
+    }
+  ],
+  "other": [],
+  "source": "Example profile"
+}
