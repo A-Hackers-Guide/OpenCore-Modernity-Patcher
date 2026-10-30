@@ -51,7 +51,7 @@ def available_images(macrecovery_dir: Path) -> List[RecoveryImage]:
     """
     One entry per macOS version: a board ID whose newest OS is that version
     """
-    boards: Dict[str, str] = json.loads((macrecovery_dir / "boards.json").read_text())
+    boards: Dict[str, str] = json.loads((macrecovery_dir / "boards.json").read_text(encoding="utf-8"))
     newest_major = max((_major(v) for v in boards.values() if _major(v) in MAJOR_TO_KERNEL),
                        key=lambda m: MAJOR_TO_KERNEL[m])
     best: Dict[str, tuple] = {}

@@ -263,4 +263,4 @@ class BuildOpenCore:
         ]
         lines += [f"WARNING: {w}" for w in p.warnings]
         lines += [f"Note: {n}" for n in p.notes]
-        (folder / "BuildReport.txt").write_text("\n".join(lines) + "\n")
+        (folder / "BuildReport.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")

@@ -92,12 +92,12 @@ class NetworkHandler:
         try:
             data = self.get_json(f"https://api.github.com/repos/{repo}/releases/latest")
             cache.parent.mkdir(parents=True, exist_ok=True)
-            cache.write_text(json.dumps(data))
+            cache.write_text(json.dumps(data), encoding="utf-8")
             return data
         except DownloadError:
             if cache.exists():
                 logging.info(f"- Offline: using cached release info for {repo}")
-                return json.loads(cache.read_text())
+                return json.loads(cache.read_text(encoding="utf-8"))
             raise
 
     def release_asset(self, repo: str, matcher: Callable[[str], bool]) -> Path:

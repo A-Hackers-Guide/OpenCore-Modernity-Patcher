@@ -20,7 +20,10 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -29,6 +32,9 @@ jobs:
       - run: pip install pytest pyflakes
       - run: python -m pyflakes ocmp tests packaging/release_info.py
       - run: python -m pytest -q tests
+      - name: Release naming works on this OS
+        shell: bash
+        run: python packaging/release_info.py refs/tags/v9.9.9-beta.1 0000000 && git checkout -- ocmp/_version.py && rm release-notes.md
 
   build:
     needs: test

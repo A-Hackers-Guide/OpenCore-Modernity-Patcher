@@ -16,7 +16,7 @@ PERSISTED = [
 
 def load(c) -> None:
     try:
-        data = json.loads(c.settings_path.read_text())
+        data = json.loads(c.settings_path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return
     for key in PERSISTED:
@@ -27,6 +27,6 @@ def load(c) -> None:
 def save(c) -> None:
     try:
         c.ensure_paths()
-        c.settings_path.write_text(json.dumps({key: getattr(c, key) for key in PERSISTED}, indent=2))
+        c.settings_path.write_text(json.dumps({key: getattr(c, key) for key in PERSISTED}, indent=2), encoding="utf-8")
     except OSError:
         logging.exception("Failed to save settings")

@@ -4,9 +4,15 @@ All notable changes to OpenCore Modernity Patcher. Versions follow [Semantic Ver
 
 ## [Unreleased]
 
-## [0.1.0-beta.1] - 2026-10-29
+## [0.1.0-beta.2] - 2026-10-30
 
 First public pre-release, codename **"First Light"**. Tested with `ocvalidate` and simulated hardware profiles only. **Not yet booted on real hardware.**
+
+> `v0.1.0-beta.1` was tagged but never published: its Windows build failed. Everything below is new in this release, plus the fixes listed here.
+
+### Fixed
+- Windows: text files (build report, settings, hardware profiles, release notes) are now always read and written as UTF-8. Before, Windows' default `cp1252` encoding crashed on characters like `→` and `®`.
+- CI now runs the tests and release naming on Windows as well as Linux, so Windows-only problems are caught before a release.
 
 ### Added
 

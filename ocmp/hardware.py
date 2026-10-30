@@ -111,12 +111,12 @@ class HardwareProfile:
 
     @classmethod
     def load(cls, path: Path) -> "HardwareProfile":
-        profile = cls.from_dict(json.loads(Path(path).read_text()))
+        profile = cls.from_dict(json.loads(Path(path).read_text(encoding="utf-8")))
         profile.source = f"Profile: {Path(path).name}"
         return profile
 
     def save(self, path: Path) -> None:
-        Path(path).write_text(self.to_json())
+        Path(path).write_text(self.to_json(), encoding="utf-8")
 
     # ---- classification ----
 
@@ -188,7 +188,7 @@ class LinuxProbe:
         return p
 
     def _cpu(self, p: HardwareProfile) -> None:
-        text = Path("/proc/cpuinfo").read_text(errors="ignore")
+        text = Path("/proc/cpuinfo").read_text(encoding="utf-8", errors="ignore")
         first = text.split("\n\n")[0]
         fields = {}
         for line in first.splitlines():
@@ -209,7 +209,7 @@ class LinuxProbe:
 
     def _read(self, path: str) -> str:
         try:
-            return Path(path).read_text(errors="ignore").strip()
+            return Path(path).read_text(encoding="utf-8", errors="ignore").strip()
         except OSError:
             return ""
 
