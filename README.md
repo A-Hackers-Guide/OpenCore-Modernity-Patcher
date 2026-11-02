@@ -2,6 +2,9 @@
 
 # OpenCore Modernity Patcher
 
+[![Download OpenCore-Modernity-Patcher](https://img.shields.io/sourceforge/dt/oc-modernity.svg?label=SourceForge%20downloads)](https://sourceforge.net/projects/oc-modernity/files/latest/download) [![Download OpenCore-Modernity-Patcher](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/oc-modernity/files/latest/download)
+
+
 **Build a bootable OpenCore EFI for your PC from Windows or Linux, with no Mac required.**
 
 The interface works like OpenCore Legacy Patcher. The target is different: Intel and AMD PCs, laptops and KVM/QEMU virtual machines.
